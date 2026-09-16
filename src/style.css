@@ -123,21 +123,29 @@ canvas {
   background: #35815e;
 }
 
+/* Deliberately NOT a full-screen modal: after completion the player should
+   be able to freely orbit/zoom the camera to look at the finished model, so
+   this wrapper doesn't dim or intercept clicks over the 3D view -- only the
+   card itself (bottom of the screen) is interactive. */
 .win-overlay {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: rgba(6, 8, 10, 0.55);
+  padding: 0 16px 24px;
+  pointer-events: none;
   font-family: system-ui, sans-serif;
 }
 
 .win-card {
-  background: #171a1f;
+  pointer-events: auto;
+  background: rgba(23, 26, 31, 0.92);
+  backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  padding: 28px 36px;
+  padding: 20px 32px;
   text-align: center;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
 }

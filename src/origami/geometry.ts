@@ -33,21 +33,20 @@ export function clipHalfPlane(poly: Pt[], a: Pt, b: Pt, keepSign: 1 | -1): Pt[] 
   return out;
 }
 
-const PAPER_THICKNESS = 0.012;
+// Paper is rendered with zero thickness (a flat plane, not an extruded
+// solid). An extruded slab exposes its side wall at every cut edge, which at
+// a fold line reads as two separate stacked layers whose cross-section has
+// visibly come apart, rather than a single continuous fold. Z_EPSILON is
+// only a tiny stacking offset between coincident flat layers to prevent
+// z-fighting; it is not a visual "thickness" and must stay far too small to
+// see.
+export const Z_EPSILON = 0.0003;
 
-/** Thin flat mesh for one polygon layer, lying in the local XY plane (Z = thickness). */
+/** Flat mesh for one polygon layer, lying in the local XY plane (zero thickness). */
 export function layerGeometry(poly: Pt[]): THREE.BufferGeometry {
   const shape = new THREE.Shape(poly.map(([x, y]) => new THREE.Vector2(x, y)));
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: PAPER_THICKNESS,
-    bevelEnabled: false,
-    curveSegments: 1,
-  });
-  geo.translate(0, 0, -PAPER_THICKNESS / 2);
-  return geo;
+  return new THREE.ShapeGeometry(shape);
 }
-
-export { PAPER_THICKNESS };
 
 /** Signed area (shoelace); positive = counter-clockwise. Used to sanity-check clip output. */
 export function polygonArea(poly: Pt[]): number {
