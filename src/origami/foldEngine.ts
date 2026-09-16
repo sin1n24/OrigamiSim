@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { clipHalfPlane, layerGeometry, polygonArea, signedSide, Z_EPSILON, type Pt } from './geometry';
+import { clipHalfPlane, layerGeometry, PAPER_THICKNESS, polygonArea, signedSide, type Pt } from './geometry';
 import { type Affine, IDENTITY, MIRROR_Y, apply, compose, invert, rotation, translation } from './affine';
 
 /**
@@ -112,8 +112,8 @@ export class OrigamiModel {
       const a = apply(rootToLocal, step.line[0]);
       const b = apply(rootToLocal, step.line[1]);
       const geo = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(a[0], a[1], Z_EPSILON),
-        new THREE.Vector3(b[0], b[1], Z_EPSILON),
+        new THREE.Vector3(a[0], a[1], PAPER_THICKNESS * 2),
+        new THREE.Vector3(b[0], b[1], PAPER_THICKNESS * 2),
       ]);
       const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color }));
       layer.group.add(line);
@@ -203,7 +203,10 @@ export class OrigamiModel {
 
       this.stackCounter += 1;
       const flapMesh = new THREE.Mesh(layerGeometry(flapLocal), this.material);
-      flapMesh.position.z = this.stackCounter * Z_EPSILON;
+      // Flush stacking (offset by exactly one thickness per layer, no extra
+      // gap) so consecutive sheets' side walls touch -- a gap here is what
+      // caused the "cross-section has come apart" look (see geometry.ts).
+      flapMesh.position.z = this.stackCounter * PAPER_THICKNESS;
       foldGroup.add(flapMesh);
 
       const flapLocalToRoot = compose(compose(layer.localToRoot, hingeXform), isFlatHalfTurn ? MIRROR_Y : IDENTITY);

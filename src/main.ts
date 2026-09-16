@@ -15,15 +15,35 @@ app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0d10);
 
+// While folding, a steep near-top-down angle is deliberate: at a grazing oblique angle,
+// thin coincident paper layers can look falsely separated due to perspective distortion
+// even when their root-space polygons match exactly (see CLAUDE.md pitfalls). But once a
+// model pops open into an actual 3D shape, that same steep angle flattens it back down to
+// near-illegible (a wall that's now standing up reads as a thin sliver from directly
+// above). onComplete() eases the camera to the shallower DISPLAY angle instead;
+// startModel() snaps it back to FOLDING for the next model.
+const FOLDING_CAMERA_POS = new THREE.Vector3(0.8, 2.4, 1.2);
+const FOLDING_CAMERA_TARGET = new THREE.Vector3(0, 0.4, 0);
+const DISPLAY_CAMERA_POS = new THREE.Vector3(1.5, 0.95, 1.6);
+const DISPLAY_CAMERA_TARGET = new THREE.Vector3(0, 0.55, 0);
+
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-// Steeper angle than a 3/4 view: at a grazing oblique angle, thin coincident paper
-// layers can look visually separated due to perspective distortion even when their
-// root-space polygons match exactly (see CLAUDE.md pitfalls).
-camera.position.set(0.8, 2.4, 1.2);
+camera.position.copy(FOLDING_CAMERA_POS);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.target.set(0, 0.4, 0);
+controls.target.copy(FOLDING_CAMERA_TARGET);
+let cameraTween: { fromPos: THREE.Vector3; toPos: THREE.Vector3; fromTarget: THREE.Vector3; toTarget: THREE.Vector3; t: number } | null = null;
+
+function tweenCameraTo(toPos: THREE.Vector3, toTarget: THREE.Vector3): void {
+  cameraTween = { fromPos: camera.position.clone(), toPos: toPos.clone(), fromTarget: controls.target.clone(), toTarget: toTarget.clone(), t: 0 };
+}
+
+function snapCameraTo(pos: THREE.Vector3, target: THREE.Vector3): void {
+  cameraTween = null;
+  camera.position.copy(pos);
+  controls.target.copy(target);
+}
 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.2));
 const sun = new THREE.DirectionalLight(0xffffff, 2.2);
@@ -88,6 +108,7 @@ function startModel(def: ModelDef): void {
   stepHinges = [];
   overlay.style.display = 'none';
   selectOverlay.style.display = 'none';
+  snapCameraTo(FOLDING_CAMERA_POS, FOLDING_CAMERA_TARGET);
   showPreview();
   updateHud();
 }
@@ -104,6 +125,7 @@ function onComplete(): void {
     const hingeIndex = stepHinges[reveal.stepIndex]?.[reveal.hingeSlot];
     if (hingeIndex !== undefined) model.setHingeTarget(hingeIndex, reveal.angleDeg);
   }
+  tweenCameraTo(DISPLAY_CAMERA_POS, DISPLAY_CAMERA_TARGET);
   overlay.style.display = 'flex';
 }
 
@@ -246,11 +268,19 @@ window.addEventListener('resize', () => {
 
 showModelSelect();
 
+const CAMERA_TWEEN_DURATION = 0.9;
 let lastTime = performance.now();
 function tick(now: number) {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
   model?.update(dt);
+  if (cameraTween) {
+    cameraTween.t = Math.min(1, cameraTween.t + dt / CAMERA_TWEEN_DURATION);
+    const e = 1 - Math.pow(1 - cameraTween.t, 3); // ease-out cubic
+    camera.position.lerpVectors(cameraTween.fromPos, cameraTween.toPos, e);
+    controls.target.lerpVectors(cameraTween.fromTarget, cameraTween.toTarget, e);
+    if (cameraTween.t >= 1) cameraTween = null;
+  }
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);

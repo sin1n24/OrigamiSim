@@ -33,19 +33,28 @@ export function clipHalfPlane(poly: Pt[], a: Pt, b: Pt, keepSign: 1 | -1): Pt[] 
   return out;
 }
 
-// Paper is rendered with zero thickness (a flat plane, not an extruded
-// solid). An extruded slab exposes its side wall at every cut edge, which at
-// a fold line reads as two separate stacked layers whose cross-section has
-// visibly come apart, rather than a single continuous fold. Z_EPSILON is
-// only a tiny stacking offset between coincident flat layers to prevent
-// z-fighting; it is not a visual "thickness" and must stay far too small to
-// see.
-export const Z_EPSILON = 0.0003;
+// Paper has a small but non-zero thickness: fully flat (zero-depth) layers
+// made it impossible to tell that a shape has multiple stacked sheets at
+// all. But the ORIGINAL extruded thickness (0.012) was stacked with a GAP
+// bigger than the extrusion itself (depth*1.2 per layer), so consecutive
+// layers' side walls didn't touch -- at a fold line that reads as two
+// stacked layers whose cross-section has visibly come apart, rather than a
+// single continuous fold. Fix: keep the depth small ("practically zero" but
+// perceptible) AND stack layers FLUSH (offset by exactly PAPER_THICKNESS,
+// no extra gap), so consecutive sheets' side walls touch with no visible
+// slit.
+export const PAPER_THICKNESS = 0.0015;
 
-/** Flat mesh for one polygon layer, lying in the local XY plane (zero thickness). */
+/** Thin mesh for one polygon layer, lying in the local XY plane (Z = thickness). */
 export function layerGeometry(poly: Pt[]): THREE.BufferGeometry {
   const shape = new THREE.Shape(poly.map(([x, y]) => new THREE.Vector2(x, y)));
-  return new THREE.ShapeGeometry(shape);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: PAPER_THICKNESS,
+    bevelEnabled: false,
+    curveSegments: 1,
+  });
+  geo.translate(0, 0, -PAPER_THICKNESS / 2);
+  return geo;
 }
 
 /** Signed area (shoelace); positive = counter-clockwise. Used to sanity-check clip output. */

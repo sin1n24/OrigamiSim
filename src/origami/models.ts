@@ -67,7 +67,14 @@ function buildCup(): ModelDef {
     // front body (its own corner + apex flaps) rides along via the scene
     // graph. The back body never moves, so this reads as the front wall
     // tilting open away from a flat back.
-    openReveal: [{ stepIndex: 0, hingeSlot: 0, angleDeg: 115 }],
+    //
+    // A hinge's angle is measured from the ORIGINAL unfolded position (0), so
+    // 180 is fully folded flat and 0 is fully unfolded -- a reveal angle
+    // close to 180 (e.g. 115, tried first) is only a little short of fully
+    // folded and reads as "stuck slightly ajar", not "open". Values on the
+    // open side of 90 (perpendicular) read as a clearly, deliberately open
+    // container instead.
+    openReveal: [{ stepIndex: 0, hingeSlot: 0, angleDeg: 92 }],
   };
 }
 
@@ -163,8 +170,9 @@ function buildYacht(): ModelDef {
     ],
     // Step 0's hinge controls the front half (sail); reopening it partway
     // tilts the sail up away from the flat hull/back half, standing the
-    // boat up -- the same trick as the cup's reveal.
-    openReveal: [{ stepIndex: 0, hingeSlot: 0, angleDeg: 130 }],
+    // boat up -- the same trick as the cup's reveal (see its comment for why
+    // this needs to be well on the open side of 90, not close to 180).
+    openReveal: [{ stepIndex: 0, hingeSlot: 0, angleDeg: 95 }],
   };
 }
 
