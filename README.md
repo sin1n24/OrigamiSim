@@ -18,11 +18,13 @@
 
 いずれも、実際の折り紙の折り図・写真を参照して手順を再現しています(独自に創作した折り方は使っていません)。
 
+## 遊んでみる
+
+https://sin1n24.github.io/OrigamiSim/
+
 ## 開発
 
 ```bash
 npm install
 npm run dev
 ```
-
-詳しいアーキテクチャや実装の経緯は [CLAUDE.md](./CLAUDE.md) を参照してください。
