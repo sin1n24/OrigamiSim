@@ -1,0 +1,166 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0d10;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
+
+.hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding: 20px 16px 0;
+  pointer-events: none;
+  font-family: system-ui, sans-serif;
+}
+
+.hud-panel {
+  pointer-events: auto;
+  background: rgba(20, 23, 28, 0.72);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 20px;
+  color: #e8edf2;
+  min-width: 260px;
+  max-width: 90vw;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.hud-progress {
+  font-size: 11px;
+  color: #6b7684;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.hud-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.hud-hint {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: #9aa7b4;
+}
+
+.hud-moves {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #6fe3a8;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-best {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: #6b7684;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-buttons {
+  margin-top: 10px;
+}
+
+.hud-button {
+  pointer-events: auto;
+  background: #2a3038;
+  color: #e8edf2;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.hud-button:hover {
+  background: #343b45;
+}
+
+.hud-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.hud-button:disabled:hover {
+  background: #2a3038;
+}
+
+.hud-button-primary {
+  background: #2d6b4f;
+  border-color: rgba(111, 227, 168, 0.35);
+}
+
+.hud-button-primary:hover:not(:disabled) {
+  background: #35815e;
+}
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 8, 10, 0.55);
+  font-family: system-ui, sans-serif;
+}
+
+.win-card {
+  background: #171a1f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 28px 36px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.win-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #6fe3a8;
+  letter-spacing: 0.04em;
+}
+
+.win-moves {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #9aa7b4;
+}
+
+.win-best {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7684;
+}
+
+.win-card .hud-button {
+  margin-top: 18px;
+}
